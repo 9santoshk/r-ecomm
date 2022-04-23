@@ -163,7 +163,7 @@ function OrderScreen() {
       {loading ? (
         <div>Loading...</div>
       ) : error ? (
-        <div>{error}</div>
+        <div className="alert-error">{error}</div>
       ) : (
         <div className="grid md:grid-cols-4 md:gap-5">
           <div className="md:col-span-3">
@@ -197,18 +197,10 @@ function OrderScreen() {
               <table className="min-w-full">
                 <thead className="border-b">
                   <tr>
-                    <th scope="col" className="px-5 text-left">
-                      Item
-                    </th>
-                    <th scope="col" className="    p-5 text-right">
-                      Quantity
-                    </th>
-                    <th scope="col" className="  p-5 text-right">
-                      Price
-                    </th>
-                    <th scope="col" className="p-5 text-right">
-                      Subtotal
-                    </th>
+                    <th className="px-5 text-left">Item</th>
+                    <th className="    p-5 text-right">Quantity</th>
+                    <th className="  p-5 text-right">Price</th>
+                    <th className="p-5 text-right">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -301,10 +293,6 @@ function OrderScreen() {
     </Layout>
   );
 }
-
-// export async function getServerSideProps({ params }) {
-//   return { props: { params } };
-// }
 
 const ClientSideOrderScreen = dynamic(() => Promise.resolve(OrderScreen), {
   ssr: false,

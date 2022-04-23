@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Cookies from 'js-cookie';
 import { toast, ToastContainer } from 'react-toastify';
@@ -10,6 +10,7 @@ import {
   MenuIcon,
   SunIcon,
   MoonIcon,
+  SearchIcon,
 } from '@heroicons/react/outline';
 import Head from 'next/head';
 import { Store } from '../utils/Store';
@@ -17,8 +18,10 @@ import axios from 'axios';
 import { getError } from '../utils/error';
 import { Menu } from '@headlessui/react';
 import DropdownLink from './DropdownLink';
+import { useRouter } from 'next/router';
 
 export default function Layout({ children, title }) {
+  const router = useRouter();
   const { status, data: session } = useSession();
   const { state, dispatch } = useContext(Store);
   const { darkMode, cart } = state;
@@ -68,14 +71,12 @@ export default function Layout({ children, title }) {
     }
   };
 
-  // const [query, setQuery] = useState('');
-  // const queryChangeHandler = (e) => {
-  //   setQuery(e.target.value);
-  // };
-  // const submitHandler = (e) => {
-  //   e.preventDefault();
-  //   router.push(`/search?query=${query}`);
-  // };
+  const [query, setQuery] = useState('');
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    router.push(`/search?query=${query}`);
+  };
 
   const darkModeChangeHandler = () => {
     const newDarkMode = !darkMode;
@@ -94,6 +95,25 @@ export default function Layout({ children, title }) {
   const navMenu = () => {
     return (
       <>
+        <form
+          onSubmit={submitHandler}
+          className="mx-auto mr-3 mt-1 flex w-full justify-center md:hidden"
+        >
+          <input
+            onChange={(e) => setQuery(e.target.value)}
+            type="search"
+            className="rounded-tr-none rounded-br-none p-1 text-sm"
+            placeholder="Search products"
+          />
+          <button
+            className="rounded rounded-tl-none rounded-bl-none bg-amber-300 p-1 text-sm dark:text-black"
+            type="submit"
+            id="button-addon2"
+          >
+            <SearchIcon className="h-5 w-5"></SearchIcon>
+          </button>
+        </form>
+
         {status === 'loading' ? (
           'Loading'
         ) : session?.user ? (
@@ -135,12 +155,12 @@ export default function Layout({ children, title }) {
           </Link>
         )}
 
-        <div className="p-2">
+        <div className="mx-auto p-2">
           <Link href="/cart">
-            <a className="p-2">
+            <a className="flex items-center p-2">
               Cart{' '}
               {cart.cartItems.length > 0 && (
-                <span className="rounded-full bg-red-600 px-2 text-xs font-bold text-white">
+                <span className="ml-1 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
                   {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
                 </span>
               )}
@@ -177,7 +197,7 @@ export default function Layout({ children, title }) {
       <div className="flex min-h-screen flex-col justify-between bg-white text-black transition-all  dark:bg-black dark:text-white">
         <div>
           <nav
-            className="relative flex h-10 items-center  justify-between shadow-md dark:shadow-gray-700 "
+            className="relative flex h-12 items-center  justify-between shadow-md dark:shadow-gray-700 "
             role="navigation"
           >
             <div className="flex items-center">
@@ -193,6 +213,24 @@ export default function Layout({ children, title }) {
                 </a>
               </Link>
             </div>
+            <form
+              onSubmit={submitHandler}
+              className="mx-auto   hidden w-full justify-center md:flex "
+            >
+              <input
+                onChange={(e) => setQuery(e.target.value)}
+                type="search"
+                className="rounded-tr-none rounded-br-none p-1 text-sm   focus:ring-0"
+                placeholder="Search products"
+              />
+              <button
+                className="rounded rounded-tl-none rounded-bl-none bg-amber-300 p-1 text-sm dark:text-black"
+                type="submit"
+                id="button-addon2"
+              >
+                <SearchIcon className="h-5 w-5"></SearchIcon>
+              </button>
+            </form>
             <div className="cursor-pointer px-4 md:hidden" onClick={toggle}>
               <DotsVerticalIcon className="h-5 w-5 text-blue-500"></DotsVerticalIcon>
             </div>

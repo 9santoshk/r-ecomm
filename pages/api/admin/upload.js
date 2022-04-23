@@ -11,12 +11,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
-
 const handler = nextConnect({ onError });
 const upload = multer();
 

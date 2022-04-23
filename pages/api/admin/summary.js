@@ -1,17 +1,14 @@
-import nc from 'next-connect';
+import { getSession } from 'next-auth/react';
 import Order from '../../../models/Order';
 import Product from '../../../models/Product';
 import User from '../../../models/User';
-import { isAuth, isAdmin } from '../../../utils/auth';
 import db from '../../../utils/db';
-import { onError } from '../../../utils/error';
 
-const handler = nc({
-  onError,
-});
-handler.use(isAuth, isAdmin);
-
-handler.get(async (req, res) => {
+const handler = async (req, res) => {
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).send('signin required');
+  }
   await db.connect();
   const ordersCount = await Order.countDocuments();
   const productsCount = await Product.countDocuments();
@@ -36,6 +33,6 @@ handler.get(async (req, res) => {
   ]);
   await db.disconnect();
   res.send({ ordersCount, productsCount, usersCount, ordersPrice, salesData });
-});
+};
 
 export default handler;

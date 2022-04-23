@@ -1,12 +1,11 @@
 import db from '../utils/db';
 import Layout from '../components/Layout';
-import Link from 'next/link';
 import Product from '../models/Product';
 import { useContext } from 'react';
 import { Store } from '../utils/Store';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Rating from '../components/Rating';
+import ProductItem from '../components/ProductItem';
 
 export default function Home({ topRatedProducts }) {
   const { state, dispatch } = useContext(Store);
@@ -16,7 +15,7 @@ export default function Home({ topRatedProducts }) {
     const quantity = existItem ? existItem.quantity + 1 : 1;
     const { data } = await axios.get(`/api/products/${product._id}`);
     if (data.countInStock < quantity) {
-      window.alert('Sorry. Product is out of stock');
+      toast.error('Sorry. Product is out of stock');
       return;
     }
     dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
@@ -29,32 +28,11 @@ export default function Home({ topRatedProducts }) {
       {topRatedProducts.length === 0 && <div>No Product Found</div>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {topRatedProducts.map((product) => (
-          <div key={product.slug} className="card">
-            <Link href={`/product/${product.slug}`}>
-              <a>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="rounded shadow"
-                />
-              </a>
-            </Link>
-            <div className="center-content p-5">
-              <h2 className="text-lg">
-                <Link href={`/product/${product.slug}`}>{product.name}</Link>
-              </h2>
-              {<Rating rating={product.rating} />}
-              <p className="mb-2">{product.brand}</p>
-              <p>${product.price}</p>
-              <button
-                onClick={() => addToCartHandler(product)}
-                className="primary-button"
-                type="button"
-              >
-                Add to cart
-              </button>
-            </div>
-          </div>
+          <ProductItem
+            key={product._id}
+            product={product}
+            addToCartHandler={addToCartHandler}
+          />
         ))}
       </div>
     </Layout>

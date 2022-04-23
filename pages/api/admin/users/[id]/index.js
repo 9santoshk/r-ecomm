@@ -1,19 +1,32 @@
-import nc from 'next-connect';
-import { isAdmin, isAuth } from '../../../../../utils/auth';
 import User from '../../../../../models/User';
 import db from '../../../../../utils/db';
+import { getSession } from 'next-auth/react';
 
-const handler = nc();
-handler.use(isAuth, isAdmin);
+const handler = async (req, res) => {
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).send('signin required');
+  }
+  const { user } = session;
+  if (req.method === 'GET') {
+    return getHandler(req, res, user);
+  } else if (req.method === 'PUT') {
+    return putHandler(req, res, user);
+  } else if (req.method === 'DELETE') {
+    return deleteHandler(req, res, user);
+  } else {
+    return res.status(400).send({ message: 'Method not allowed' });
+  }
+};
 
-handler.get(async (req, res) => {
+const getHandler = async (req, res) => {
   await db.connect();
   const user = await User.findById(req.query.id);
   await db.disconnect();
   res.send(user);
-});
+};
 
-handler.put(async (req, res) => {
+const putHandler = async (req, res) => {
   await db.connect();
   const user = await User.findById(req.query.id);
   if (user) {
@@ -26,9 +39,9 @@ handler.put(async (req, res) => {
     await db.disconnect();
     res.status(404).send({ message: 'User Not Found' });
   }
-});
+};
 
-handler.delete(async (req, res) => {
+const deleteHandler = async (req, res) => {
   await db.connect();
   const user = await User.findById(req.query.id);
   if (user) {
@@ -39,6 +52,6 @@ handler.delete(async (req, res) => {
     await db.disconnect();
     res.status(404).send({ message: 'User Not Found' });
   }
-});
+};
 
 export default handler;

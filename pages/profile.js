@@ -1,29 +1,25 @@
 import axios from 'axios';
-import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useForm } from 'react-hook-form';
 import { getError } from '../utils/error';
 import { toast } from 'react-toastify';
-import Link from 'next/link';
 import { signIn, useSession } from 'next-auth/react';
 
-export default function Register() {
+export default function ProfileScreen() {
   const { data: session } = useSession();
   const {
     handleSubmit,
     register,
     getValues,
+    setValue,
     formState: { errors },
   } = useForm();
-  const router = useRouter();
-  const { redirect } = router.query;
 
   useEffect(() => {
-    if (session?.user) {
-      router.push(redirect || '/');
-    }
-  }, [router, session, redirect]);
+    setValue('name', session.user.name);
+    setValue('email', session.user.email);
+  }, [session.user, setValue]);
 
   const submitHandler = async ({ name, email, password, confirmPassword }) => {
     if (password !== confirmPassword) {
@@ -31,7 +27,7 @@ export default function Register() {
       return;
     }
     try {
-      await axios.post('/api/auth/signup', {
+      await axios.put('/api/auth/update', {
         name,
         email,
         password,
@@ -41,6 +37,7 @@ export default function Register() {
         email,
         password,
       });
+      toast.success('Profile updated successfully');
       if (result.error) {
         toast.error(result.error);
       }
@@ -49,12 +46,12 @@ export default function Register() {
     }
   };
   return (
-    <Layout title="Create Account">
+    <Layout title="Profile">
       <form
         className="mx-auto max-w-screen-md"
         onSubmit={handleSubmit(submitHandler)}
       >
-        <h1 className="mb-4 text-xl">Create Account</h1>
+        <h1 className="mb-4 text-xl">Update Profile</h1>
         <div className="mb-4">
           <label htmlFor="name">Name</label>
           <input
@@ -96,7 +93,6 @@ export default function Register() {
             type="password"
             id="password"
             {...register('password', {
-              required: 'Please enter password',
               minLength: { value: 2, message: 'password is more than 5 chars' },
             })}
           />
@@ -111,7 +107,6 @@ export default function Register() {
             type="password"
             id="confirmPassword"
             {...register('confirmPassword', {
-              required: 'Please enter confirm password',
               validate: (value) => value === getValues('password'),
               minLength: {
                 value: 2,
@@ -130,13 +125,10 @@ export default function Register() {
             )}
         </div>
         <div className="mb-4 ">
-          <button className="primary-button">Register</button>
-        </div>
-        <div className="mb-4 ">
-          Don&apos;t have an account? &nbsp;
-          <Link href={`/register?redirect=${redirect || '/'}`}>Register</Link>
+          <button className="primary-button">Update Profile</button>
         </div>
       </form>
     </Layout>
   );
 }
+ProfileScreen.auth = true;

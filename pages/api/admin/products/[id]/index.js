@@ -1,19 +1,32 @@
-import nc from 'next-connect';
-import { isAdmin, isAuth } from '../../../../../utils/auth';
 import Product from '../../../../../models/Product';
 import db from '../../../../../utils/db';
+import { getSession } from 'next-auth/react';
 
-const handler = nc();
-handler.use(isAuth, isAdmin);
+const handler = async (req, res) => {
+  const session = await getSession({ req });
+  if (!session) {
+    return res.status(401).send('signin required');
+  }
+  const { user } = session;
+  if (req.method === 'GET') {
+    return getHandler(req, res, user);
+  } else if (req.method === 'PUT') {
+    return putHandler(req, res, user);
+  } else if (req.method === 'DELETE') {
+    return deleteHandler(req, res, user);
+  } else {
+    return res.status(400).send({ message: 'Method not allowed' });
+  }
+};
 
-handler.get(async (req, res) => {
+const getHandler = async (req, res) => {
   await db.connect();
   const product = await Product.findById(req.query.id);
   await db.disconnect();
   res.send(product);
-});
+};
 
-handler.put(async (req, res) => {
+const putHandler = async (req, res) => {
   await db.connect();
   const product = await Product.findById(req.query.id);
   if (product) {
@@ -29,24 +42,24 @@ handler.put(async (req, res) => {
     product.description = req.body.description;
     await product.save();
     await db.disconnect();
-    res.send({ message: 'Product Updated Successfully' });
+    res.send({ message: 'Product updated successfully' });
   } else {
     await db.disconnect();
-    res.status(404).send({ message: 'Product Not Found' });
+    res.status(404).send({ message: 'Product not found' });
   }
-});
+};
 
-handler.delete(async (req, res) => {
+const deleteHandler = async (req, res) => {
   await db.connect();
   const product = await Product.findById(req.query.id);
   if (product) {
     await product.remove();
     await db.disconnect();
-    res.send({ message: 'Product Deleted' });
+    res.send({ message: 'Product deleted successfully' });
   } else {
     await db.disconnect();
-    res.status(404).send({ message: 'Product Not Found' });
+    res.status(404).send({ message: 'Product not found' });
   }
-});
+};
 
 export default handler;
