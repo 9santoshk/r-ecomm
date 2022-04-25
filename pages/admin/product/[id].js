@@ -36,7 +36,6 @@ function reducer(state, action) {
       return state;
   }
 }
-
 function AdminProdcutEdit() {
   const { query } = useRouter();
   const productId = query.id;
@@ -76,12 +75,22 @@ function AdminProdcutEdit() {
     fetchData();
   }, [productId, setValue]);
   const uploadHandler = async (e, imageField = 'image') => {
-    const file = e.target.files[0];
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
+    const url = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`;
+
     try {
       dispatch({ type: 'UPLOAD_REQUEST' });
-      const { data } = await axios.post('/api/admin/upload', bodyFormData);
+      const {
+        data: { signature, timestamp },
+      } = await axios('/api/admin/cloudinary-sign');
+
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('signature', signature);
+      formData.append('timestamp', timestamp);
+      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY);
+      const { data } = await axios.post(url, formData);
+      console.log(data);
       dispatch({ type: 'UPLOAD_SUCCESS' });
       setValue(imageField, data.secure_url);
       toast.success('File uploaded successfully');

@@ -66,7 +66,7 @@ export default function PlaceOrderScreen() {
         </div>
       ) : (
         <div className="grid md:grid-cols-4 md:gap-5">
-          <div className="md:col-span-3">
+          <div className="overflow-x-auto md:col-span-3">
             <div className="card  p-5">
               <h2 className="mb-2 text-lg">Shipping Address</h2>
               <div>
@@ -87,7 +87,7 @@ export default function PlaceOrderScreen() {
               </div>
             </div>
 
-            <div className="card  p-5">
+            <div className="card overflow-x-auto p-5">
               <h2 className="mb-2 text-lg">Order Items</h2>
               <table className="min-w-full">
                 <thead className="border-b">

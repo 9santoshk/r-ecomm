@@ -1,28 +1,11 @@
 import axios from 'axios';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import NextLink from 'next/link';
-import React, { useEffect, useContext, useReducer, useState } from 'react';
-import {
-  Grid,
-  List,
-  ListItem,
-  Typography,
-  Card,
-  Button,
-  ListItemText,
-  TextField,
-  CircularProgress,
-  Checkbox,
-  FormControlLabel,
-} from '@mui/material';
+import React, { useEffect, useReducer } from 'react';
 import { getError } from '../../../utils/error';
-import { Store } from '../../../utils/Store';
 import Layout from '../../../components/Layout';
-import { Controller, useForm } from 'react-hook-form';
-import { useSnackbar } from 'notistack';
-import Form from '../../../components/Form';
-import classes from '../../../utils/classes';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import Link from 'next/link';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -54,169 +37,127 @@ function reducer(state, action) {
   }
 }
 
-function UserEdit({ params }) {
-  const userId = params.id;
-  const { state } = useContext(Store);
+function AdminUserEdit() {
+  const { query } = useRouter();
+  const userId = query.id;
   const [{ loading, error, loadingUpdate }, dispatch] = useReducer(reducer, {
     loading: true,
     error: '',
   });
   const {
+    register,
     handleSubmit,
-    control,
     formState: { errors },
     setValue,
   } = useForm();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const router = useRouter();
 
-  const { userInfo } = state;
-
   useEffect(() => {
-    if (!userInfo) {
-      return router.push('/login');
-    } else {
-      const fetchData = async () => {
-        try {
-          dispatch({ type: 'FETCH_REQUEST' });
-          const { data } = await axios.get(`/api/admin/users/${userId}`, {
-            headers: { authorization: `Bearer ${userInfo.token}` },
-          });
-          setIsAdmin(data.isAdmin);
-          dispatch({ type: 'FETCH_SUCCESS' });
-          setValue('name', data.name);
-        } catch (err) {
-          dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
-        }
-      };
-      fetchData();
-    }
-  }, []);
+    const fetchData = async () => {
+      try {
+        dispatch({ type: 'FETCH_REQUEST' });
+        const { data } = await axios.get(`/api/admin/users/${userId}`);
 
-  const submitHandler = async ({ name }) => {
-    closeSnackbar();
+        dispatch({ type: 'FETCH_SUCCESS' });
+        setValue('name', data.name);
+        setValue('isAdmin', data.isAdmin);
+      } catch (err) {
+        dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
+      }
+    };
+    fetchData();
+  }, [userId, setValue]);
+
+  const submitHandler = async ({ name, isAdmin }) => {
     try {
       dispatch({ type: 'UPDATE_REQUEST' });
-      await axios.put(
-        `/api/admin/users/${userId}`,
-        {
-          name,
-          isAdmin,
-        },
-        { headers: { authorization: `Bearer ${userInfo.token}` } }
-      );
+      await axios.put(`/api/admin/users/${userId}`, {
+        name,
+        isAdmin,
+      });
       dispatch({ type: 'UPDATE_SUCCESS' });
-      enqueueSnackbar('User updated successfully', { variant: 'success' });
+      toast.success('User updated successfully');
       router.push('/admin/users');
     } catch (err) {
       dispatch({ type: 'UPDATE_FAIL', payload: getError(err) });
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err));
     }
   };
   return (
     <Layout title={`Edit User ${userId}`}>
-      <Grid container spacing={1}>
-        <Grid item md={3} xs={12}>
-          <Card sx={classes.section}>
-            <List>
-              <NextLink href="/admin/dashboard" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Admin Dashboard"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/orders" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Orders"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/products" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Products"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/users" passHref>
-                <ListItem selected button component="a">
-                  <ListItemText primary="Users"></ListItemText>
-                </ListItem>
-              </NextLink>
-            </List>
-          </Card>
-        </Grid>
-        <Grid item md={9} xs={12}>
-          <Card sx={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h1" variant="h1">
-                  Edit User {userId}
-                </Typography>
-              </ListItem>
-              <ListItem>
-                {loading && <CircularProgress></CircularProgress>}
-                {error && <Typography sx={classes.error}>{error}</Typography>}
-              </ListItem>
-              <ListItem>
-                <Form onSubmit={handleSubmit(submitHandler)}>
-                  <List>
-                    <ListItem>
-                      <Controller
-                        name="name"
-                        control={control}
-                        defaultValue=""
-                        rules={{
-                          required: true,
-                        }}
-                        render={({ field }) => (
-                          <TextField
-                            variant="outlined"
-                            fullWidth
-                            id="name"
-                            label="Name"
-                            error={Boolean(errors.name)}
-                            helperText={errors.name ? 'Name is required' : ''}
-                            {...field}
-                          ></TextField>
-                        )}
-                      ></Controller>
-                    </ListItem>
-                    <ListItem>
-                      <FormControlLabel
-                        label="Is Admin"
-                        control={
-                          <Checkbox
-                            onClick={(e) => setIsAdmin(e.target.checked)}
-                            checked={isAdmin}
-                            name="isAdmin"
-                          />
-                        }
-                      ></FormControlLabel>
-                    </ListItem>
-                    <ListItem>
-                      <Button
-                        variant="contained"
-                        type="submit"
-                        fullWidth
-                        color="primary"
-                      >
-                        Update
-                      </Button>
-                      {loadingUpdate && <CircularProgress />}
-                    </ListItem>
-                  </List>
-                </Form>
-              </ListItem>
-            </List>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="grid md:grid-cols-4 md:gap-5">
+        <div>
+          <ul>
+            <li>
+              <Link href="/admin/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link href="/admin/orders">Orders</Link>
+            </li>
+            <li>
+              <Link href="/admin/users">Products</Link>
+            </li>
+            <li>
+              <Link href="/admin/users">
+                <a className="font-bold">Users</a>
+              </Link>
+            </li>
+          </ul>
+        </div>
+        <div className="md:col-span-3">
+          {loading ? (
+            <div>Loading...</div>
+          ) : error ? (
+            <div className="alert-error">{error}</div>
+          ) : (
+            <form
+              className="mx-auto max-w-screen-md"
+              onSubmit={handleSubmit(submitHandler)}
+            >
+              <h1 className="mb-4 text-xl">{`Edit User ${userId}`}</h1>
+              <div className="mb-4">
+                <label htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  className="w-full"
+                  id="name"
+                  autoFocus
+                  {...register('name', {
+                    required: 'Please enter name',
+                  })}
+                />
+                {errors.name && (
+                  <div className="text-red-500">{errors.name.message}</div>
+                )}
+              </div>
+              <div className="mb-4">
+                <label htmlFor="isAdmin">Is Admin</label>
+                <input
+                  type="checkbox"
+                  className="w-full"
+                  id="isAdmin"
+                  {...register('isAdmin')}
+                />
+
+                {errors.isAdmin && (
+                  <div className="text-red-500">{errors.isAdmin.message}</div>
+                )}
+              </div>
+              <div className="mb-4">
+                <button disabled={loadingUpdate} className="primary-button">
+                  {loadingUpdate ? 'Loading' : 'Update'}
+                </button>
+              </div>
+              <div className="mb-4">
+                <Link href={`/admin/users`}>Back</Link>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }
 
-export async function getServerSideProps({ params }) {
-  return {
-    props: { params },
-  };
-}
-
-export default dynamic(() => Promise.resolve(UserEdit), { ssr: false });
+AdminUserEdit.auth = { adminOnly: true };
+export default AdminUserEdit;

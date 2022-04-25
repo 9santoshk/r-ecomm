@@ -63,14 +63,14 @@ const postHandler = async (req, res, user) => {
   }
 };
 const handler = async (req, res) => {
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).send('signin required');
-  }
-  const { user } = session;
   if (req.method === 'GET') {
-    return getHandler(req, res, user);
+    return getHandler(req, res);
   } else if (req.method === 'POST') {
+    const session = await getSession({ req });
+    if (!session) {
+      return res.status(401).send('signin required');
+    }
+    const { user } = session;
     return postHandler(req, res, user);
   } else {
     return res.status(400).send({ message: 'Method not allowed' });

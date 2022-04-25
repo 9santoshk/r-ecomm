@@ -58,16 +58,16 @@ function AdminOrders() {
             </li>
           </ul>
         </div>
-        <div className="md:col-span-3">
+        <div className="overflow-x-auto md:col-span-3">
           <div className="flex justify-between">
-            <h1 className="mb-4 text-xl">Admin Or ders</h1>
+            <h1 className="mb-4 text-xl">Admin Orders</h1>
           </div>
           {loading ? (
             <div>Loading...</div>
           ) : error ? (
             <div className="alert-error">{error}</div>
           ) : (
-            <div>
+            <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead className="border-b">
                   <tr>

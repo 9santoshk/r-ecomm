@@ -1,29 +1,11 @@
 import axios from 'axios';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import NextLink from 'next/link';
 import React, { useEffect, useContext, useReducer } from 'react';
-import {
-  CircularProgress,
-  Grid,
-  List,
-  ListItem,
-  Typography,
-  Card,
-  Button,
-  ListItemText,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-} from '@mui/material';
 import { getError } from '../../utils/error';
 import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
-import classes from '../../utils/classes';
-import { useSnackbar } from 'notistack';
+import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -61,15 +43,10 @@ function AdminUsers() {
     });
 
   useEffect(() => {
-    if (!userInfo) {
-      router.push('/login');
-    }
     const fetchData = async () => {
       try {
         dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/admin/users`, {
-          headers: { authorization: `Bearer ${userInfo.token}` },
-        });
+        const { data } = await axios.get(`/api/admin/users`);
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
@@ -82,117 +59,104 @@ function AdminUsers() {
     }
   }, [successDelete]);
 
-  const { enqueueSnackbar } = useSnackbar();
-
+  const createHandler = async () => {
+    if (!window.confirm('Are you sure?')) {
+      return;
+    }
+    try {
+      dispatch({ type: 'CREATE_REQUEST' });
+      const { data } = await axios.post(`/api/admin/users`);
+      dispatch({ type: 'CREATE_SUCCESS' });
+      toast.success('Product created successfully');
+      router.push(`/admin/user/${data.user._id}`);
+    } catch (err) {
+      dispatch({ type: 'CREATE_FAIL' });
+      toast.error(getError(err));
+    }
+  };
   const deleteHandler = async (userId) => {
     if (!window.confirm('Are you sure?')) {
       return;
     }
     try {
       dispatch({ type: 'DELETE_REQUEST' });
-      await axios.delete(`/api/admin/users/${userId}`, {
-        headers: { authorization: `Bearer ${userInfo.token}` },
-      });
+      await axios.delete(`/api/admin/users/${userId}`);
       dispatch({ type: 'DELETE_SUCCESS' });
-      enqueueSnackbar('User deleted successfully', { variant: 'success' });
+      toast.success('Product deleted successfully', { variant: 'success' });
     } catch (err) {
       dispatch({ type: 'DELETE_FAIL' });
-      enqueueSnackbar(getError(err), { variant: 'error' });
+      toast.error(getError(err), { variant: 'error' });
     }
   };
   return (
     <Layout title="Users">
-      <Grid container spacing={1}>
-        <Grid item md={3} xs={12}>
-          <Card sx={classes.section}>
-            <List>
-              <NextLink href="/admin/dashboard" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Admin Dashboard"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/orders" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Orders"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/products" passHref>
-                <ListItem button component="a">
-                  <ListItemText primary="Products"></ListItemText>
-                </ListItem>
-              </NextLink>
-              <NextLink href="/admin/users" passHref>
-                <ListItem selected button component="a">
-                  <ListItemText primary="Users"></ListItemText>
-                </ListItem>
-              </NextLink>
-            </List>
-          </Card>
-        </Grid>
-        <Grid item md={9} xs={12}>
-          <Card sx={classes.section}>
-            <List>
-              <ListItem>
-                <Typography component="h1" variant="h1">
-                  Users
-                </Typography>
-                {loadingDelete && <CircularProgress />}
-              </ListItem>
-
-              <ListItem>
-                {loading ? (
-                  <CircularProgress />
-                ) : error ? (
-                  <Typography sx={classes.error}>{error}</Typography>
-                ) : (
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>ID</TableCell>
-                          <TableCell>NAME</TableCell>
-                          <TableCell>EMAIL</TableCell>
-                          <TableCell>ISADMIN</TableCell>
-                          <TableCell>ACTIONS</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {users.map((user) => (
-                          <TableRow key={user._id}>
-                            <TableCell>{user._id.substring(20, 24)}</TableCell>
-                            <TableCell>{user.name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>{user.isAdmin ? 'YES' : 'NO'}</TableCell>
-                            <TableCell>
-                              <NextLink
-                                href={`/admin/user/${user._id}`}
-                                passHref
-                              >
-                                <Button size="small" variant="contained">
-                                  Edit
-                                </Button>
-                              </NextLink>{' '}
-                              <Button
-                                onClick={() => deleteHandler(user._id)}
-                                size="small"
-                                variant="contained"
-                              >
-                                Delete
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </ListItem>
-            </List>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="grid md:grid-cols-4 md:gap-5">
+        <div className="">
+          <ul>
+            <li>
+              <Link href="/admin/dashboard">Dashboard</Link>
+            </li>
+            <li>
+              <Link href="/admin/orders">Orders</Link>
+            </li>
+            <li>
+              <Link href="/admin/products">Products</Link>
+            </li>
+            <li>
+              <Link href="/admin/users">
+                <a className="font-bold">Users</a>
+              </Link>
+            </li>
+          </ul>
+        </div>
+        <div className="overflow-x-auto md:col-span-3">
+          <div className="flex justify-between">
+            <h1 className="mb-4 text-xl">Users</h1>
+            {loadingDelete && <div>Deleting...</div>}
+          </div>
+          {loading ? (
+            <div>Loading...</div>
+          ) : error ? (
+            <div className="alert-error">{error}</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead className="border-b">
+                  <tr>
+                    <th className="px-5 text-left">ID</th>
+                    <th className="p-5 text-left">NAME</th>
+                    <th className="p-5 text-left">EMAIL</th>
+                    <th className="p-5 text-left">ADMIN</th>
+                    <th className="p-5 text-left">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user._id} className="border-b">
+                      <td className=" p-5 ">{user._id.substring(20, 24)}</td>
+                      <td className=" p-5 ">{user.name}</td>
+                      <td className=" p-5 ">{user.email}</td>
+                      <td className=" p-5 ">{user.isAdmin ? 'YES' : 'NO'}</td>
+                      <td className=" p-5 ">
+                        <Link href={`/admin/user/${user._id}`} passHref>
+                          Edit
+                        </Link>
+                        &nbsp;
+                        <button onClick={() => deleteHandler(user._id)}>
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }
 
-export default dynamic(() => Promise.resolve(AdminUsers), { ssr: false });
+AdminUsers.auth = { adminOnly: true };
+export default AdminUsers;
