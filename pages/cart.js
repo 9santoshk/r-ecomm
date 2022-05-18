@@ -27,7 +27,7 @@ function CartScreen() {
     dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
   };
   const checkoutHandler = () => {
-    router.push('/shipping');
+    router.push('/login?redirect=/shipping');
   };
   return (
     <Layout title="Shopping Cart">
