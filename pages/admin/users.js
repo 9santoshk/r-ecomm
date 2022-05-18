@@ -1,8 +1,6 @@
 import axios from 'axios';
-import { useRouter } from 'next/router';
-import React, { useEffect, useContext, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { getError } from '../../utils/error';
-import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -30,11 +28,6 @@ function reducer(state, action) {
 }
 
 function AdminUsers() {
-  const { state } = useContext(Store);
-  const router = useRouter();
-
-  const { userInfo } = state;
-
   const [{ loading, error, users, successDelete, loadingDelete }, dispatch] =
     useReducer(reducer, {
       loading: true,
@@ -59,21 +52,6 @@ function AdminUsers() {
     }
   }, [successDelete]);
 
-  const createHandler = async () => {
-    if (!window.confirm('Are you sure?')) {
-      return;
-    }
-    try {
-      dispatch({ type: 'CREATE_REQUEST' });
-      const { data } = await axios.post(`/api/admin/users`);
-      dispatch({ type: 'CREATE_SUCCESS' });
-      toast.success('Product created successfully');
-      router.push(`/admin/user/${data.user._id}`);
-    } catch (err) {
-      dispatch({ type: 'CREATE_FAIL' });
-      toast.error(getError(err));
-    }
-  };
   const deleteHandler = async (userId) => {
     if (!window.confirm('Are you sure?')) {
       return;

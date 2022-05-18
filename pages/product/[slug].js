@@ -55,6 +55,12 @@ export default function ProductScreen(props) {
     fetchReviews();
   }, [fetchReviews]);
 
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm();
+
   if (!product) {
     return (
       <Layout>
@@ -73,12 +79,6 @@ export default function ProductScreen(props) {
     dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
     router.push('/cart');
   };
-
-  const {
-    handleSubmit,
-    register,
-    formState: { errors },
-  } = useForm();
 
   return (
     <Layout title={product.name}>

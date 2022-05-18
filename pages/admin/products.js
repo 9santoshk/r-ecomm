@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import React, { useEffect, useContext, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { getError } from '../../utils/error';
-import { Store } from '../../utils/Store';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
@@ -35,10 +34,7 @@ function reducer(state, action) {
 }
 
 function AdminProdcuts() {
-  const { state } = useContext(Store);
   const router = useRouter();
-
-  const { userInfo } = state;
 
   const [
     { loading, error, products, loadingCreate, successDelete, loadingDelete },

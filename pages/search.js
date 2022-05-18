@@ -6,7 +6,7 @@ import Product from '../models/Product';
 import ProductItem from '../components/ProductItem';
 import { Store } from '../utils/Store';
 import axios from 'axios';
-import { LockClosedIcon, XCircleIcon } from '@heroicons/react/outline';
+import { XCircleIcon } from '@heroicons/react/outline';
 import { toast } from 'react-toastify';
 
 const PAGE_SIZE = 2;

@@ -12,7 +12,6 @@ export default function Shipping() {
   const { state, dispatch } = useContext(Store);
   const { cart } = state;
   const { shippingAddress, paymentMethod } = cart;
-  const { location } = shippingAddress;
 
   useEffect(() => {
     if (!shippingAddress.address) {
