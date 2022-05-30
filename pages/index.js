@@ -4,8 +4,10 @@ import Product from '../models/Product';
 import { useContext } from 'react';
 import { Store } from '../utils/Store';
 import axios from 'axios';
+import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requires a loader
 import { toast } from 'react-toastify';
 import ProductItem from '../components/ProductItem';
+import { Carousel } from 'react-responsive-carousel';
 
 export default function Home({ topRatedProducts }) {
   const { state, dispatch } = useContext(Store);
@@ -25,6 +27,15 @@ export default function Home({ topRatedProducts }) {
 
   return (
     <Layout title="Amazona">
+      <Carousel showThumbs={false} autoPlay>
+        <div>
+          <img src="/images/banner1.jpg" />
+        </div>
+        <div>
+          <img src="/images/banner2.jpg" />
+        </div>
+      </Carousel>
+      <h2 className="my-3 text-2xl">Featured Products</h2>
       {topRatedProducts.length === 0 && <div>No Product Found</div>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {topRatedProducts.map((product) => (

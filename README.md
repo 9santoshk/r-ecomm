@@ -195,7 +195,14 @@ decription
     2. feed carousel data
     3. show popular products
 57. Choose Location on Map
+
     1. add google map
     2. create map screen
     3. choose location
     4. show in order screen
+
+58. Create Place Order Screen
+    1. display shipping address
+    2. display payment method
+    3. display order items
+    4. create action card for create order
