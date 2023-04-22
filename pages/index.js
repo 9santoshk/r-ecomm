@@ -26,7 +26,7 @@ export default function Home({ topRatedProducts }) {
   };
 
   return (
-    <Layout title="Amazona">
+    <Layout title="Colour My Space">
       <Carousel showThumbs={false} autoPlay>
         <div>
           <img src="/images/banner1.jpg" />

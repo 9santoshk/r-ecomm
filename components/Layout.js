@@ -188,7 +188,7 @@ export default function Layout({ children, title }) {
   return (
     <>
       <Head>
-        <title>{title ? title : 'Amazona'}</title>
+        <title>{title ? title : 'Colour My Space'}</title>
         <meta name="description" content="Ecommerce Website" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -209,7 +209,7 @@ export default function Layout({ children, title }) {
               </div>
               <Link href="/">
                 <a className="text-lg font-bold text-black dark:text-white">
-                  amazona
+                  Colour My Space
                 </a>
               </Link>
             </div>
@@ -245,9 +245,8 @@ export default function Layout({ children, title }) {
             {navMenu()}
           </div>
           <div
-            className={`fixed top-0 left-0 z-40 h-full w-[20rem] bg-gray-300 p-10 duration-300  ease-in-out dark:bg-gray-800 ${
-              showSidebar ? 'translate-x-0' : 'translate-x-[-20rem]'
-            }`}
+            className={`fixed top-0 left-0 z-40 h-full w-[20rem] bg-gray-300 p-10 duration-300  ease-in-out dark:bg-gray-800 ${showSidebar ? 'translate-x-0' : 'translate-x-[-20rem]'
+              }`}
           >
             <div className="mb-2 flex justify-between">
               <h2>Shopping By Categories</h2>
@@ -266,7 +265,7 @@ export default function Layout({ children, title }) {
         </div>
         <div className="container m-auto mt-4 px-4">{children}</div>
         <div className="flex h-10 items-center justify-center shadow-inner dark:shadow-gray-700">
-          <p>Copyright © 2022 Amazona</p>
+          <p>Copyright © 2022 Colour My Space</p>
         </div>
       </div>
     </>
